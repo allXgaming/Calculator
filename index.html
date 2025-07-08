@@ -1,140 +1,340 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Simple Calculator</title>
-  <style>
-    body {
-      background: #f0f0f0;
-      font-family: Arial, sans-serif;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      margin: 0;
-    }
-
-    .calculator {
-      background: white;
-      padding: 20px;
-      border-radius: 10px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
-      width: 260px;
-    }
-
-    .display {
-      width: 100%;
-      height: 50px;
-      font-size: 24px;
-      margin-bottom: 10px;
-      text-align: right;
-      padding: 10px;
-      box-sizing: border-box;
-      border: 1px solid #ccc;
-      border-radius: 5px;
-    }
-
-    .buttons {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 10px;
-    }
-
-    button {
-      padding: 20px;
-      font-size: 18px;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-      background: #eee;
-    }
-
-    button.operator {
-      background: #ff9f43;
-      color: white;
-    }
-
-    button.equal {
-      background: #0abde3;
-      color: white;
-      grid-column: span 2;
-    }
-
-    button.clear {
-      background: #ee5253;
-      color: white;
-    }
-
-    /* Ad container style */
-    .ad-container {
-      margin-top: 20px;
-      width: 468px;
-      height: 60px;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game Hub</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <style>
+        :root {
+            --dark-bg: #0e0e0e;
+            --container-bg: rgba(20, 20, 30, 0.5);
+            --border-color: rgba(255, 255, 255, 0.2);
+            --input-bg: rgba(0,0,0,0.4);
+            --focus-glow: #00ffff;
+            --gradient-1: #ff00ff;
+            --gradient-2: #9f00ff;
+            --gradient-3: #00ffff;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--dark-bg);
+            background-image: radial-gradient(circle at top left, rgba(159, 0, 255, 0.2), transparent 30%), radial-gradient(circle at bottom right, rgba(0, 255, 255, 0.2), transparent 30%);
+            color: #eee;
+            min-height: 100vh;
+            background-attachment: fixed;
+            overflow-x: hidden;
+        }
+        #app {
+            padding: 1.5rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        h1, h2 {
+            font-weight: 700;
+            background: linear-gradient(90deg, var(--gradient-1), var(--gradient-2), var(--gradient-3));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+        header {
+            display: flex;
+            align-items: center;
+            justify-content: center; /* Centered header content */
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+            padding: 0 1rem;
+        }
+        header h1 {
+            margin: 0;
+            font-size: 2.5rem;
+            flex-shrink: 0;
+        }
+        #search-bar {
+            width: 100%;
+            max-width: 400px;
+            padding: 1rem;
+            background: var(--input-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 15px;
+            color: #fff;
+            font-family: 'Poppins', sans-serif;
+            font-size: 1rem;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+        #search-bar:focus {
+            outline: none;
+            border-color: var(--focus-glow);
+            box-shadow: 0 0 10px var(--focus-glow);
+        }
+        .btn {
+            padding: 0.8rem 1.5rem;
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.3s ease;
+            text-align: center;
+        }
+        .btn:hover { transform: scale(1.05); }
+        .btn-outline {
+            background: transparent;
+            border: 2px solid var(--gradient-3);
+            color: var(--gradient-3);
+        }
+        .btn-outline:hover { box-shadow: 0 0 15px var(--gradient-3); }
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+        .app-card {
+            background: var(--container-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 25px;
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            transition: transform 0.2s ease, box-shadow 0.3s ease;
+        }
+        .app-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        }
+        .app-card-logo {
+            width: 100px;
+            height: 100px;
+            border-radius: 20px;
+            object-fit: cover;
+            margin-bottom: 1rem;
+            background: #000;
+        }
+        .app-card-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            flex-grow: 1;
+        }
+        .rating-stars {
+            color: #555;
+            margin-bottom: 1rem;
+            font-size: 1.5rem;
+        }
+        .rating-stars span {
+            cursor: pointer;
+            transition: color 0.2s ease;
+        }
+        .rating-stars span:hover,
+        .rating-stars span.hovered {
+            color: gold;
+        }
+        .rating-stars.rated span { cursor: default; }
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            z-index: 2000;
+            display: none;
+            justify-content: center;
+            align-items: center;
+        }
+        .modal.visible { display: flex; }
+        .modal iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            background: #000;
+        }
+        .modal-close {
+            position: absolute;
+            top: 20px;
+            right: 30px;
+            font-size: 3rem;
+            color: white;
+            cursor: pointer;
+            text-shadow: 0 0 10px #000;
+        }
+    </style>
 </head>
 <body>
-  <div class="calculator">
-    <input type="text" id="display" class="display" disabled />
-    <div class="buttons">
-      <button onclick="clearDisplay()" class="clear">C</button>
-      <button onclick="appendValue('(')">(</button>
-      <button onclick="appendValue(')')">)</button>
-      <button onclick="appendValue('/')" class="operator">/</button>
+    <div id="app">
+        <header>
+            <h1>Game Hub</h1>
+            <input type="search" id="search-bar" placeholder="Search for games...">
+        </header>
 
-      <button onclick="appendValue('7')">7</button>
-      <button onclick="appendValue('8')">8</button>
-      <button onclick="appendValue('9')">9</button>
-      <button onclick="appendValue('*')" class="operator">*</button>
-
-      <button onclick="appendValue('4')">4</button>
-      <button onclick="appendValue('5')">5</button>
-      <button onclick="appendValue('6')">6</button>
-      <button onclick="appendValue('-')" class="operator">-</button>
-
-      <button onclick="appendValue('1')">1</button>
-      <button onclick="appendValue('2')">2</button>
-      <button onclick="appendValue('3')">3</button>
-      <button onclick="appendValue('+')" class="operator">+</button>
-
-      <button onclick="appendValue('0')">0</button>
-      <button onclick="appendValue('.')">.</button>
-      <button onclick="calculate()" class="equal">=</button>
+        <main id="main-content">
+            <div id="app-grid" class="grid-container">
+                <!-- Game cards will be inserted here by JS -->
+            </div>
+        </main>
     </div>
-  </div>
 
-  <div class="ad-container">
-    <script type="text/javascript">
-      atOptions = {
-        key: '8f36f87f017498b17817aff785341b30',
-        format: 'iframe',
-        height: 60,
-        width: 468,
-        params: {}
-      };
+    <!-- Fullscreen Play Modal -->
+    <div id="game-modal" class="modal">
+        <span class="modal-close" id="modal-close-btn">×</span>
+        <iframe id="game-iframe" srcdoc=""></iframe>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- IMPORTANT: PASTE YOUR FIREBASE CONFIGURATION HERE ---
+            const firebaseConfig = {
+  apiKey: "AIzaSyAmc90s8je_TSM1dTZpARDg6cg-dH_TQLI",
+  authDomain: "ticm-77dac.firebaseapp.com",
+  databaseURL: "https://ticm-77dac-default-rtdb.firebaseio.com",
+  projectId: "ticm-77dac",
+  storageBucket: "ticm-77dac.firebasestorage.app",
+  messagingSenderId: "809324606678",
+  appId: "1:809324606678:web:5b0fd6c5fdb3a7c1ea4577"
+};
+            // --- END OF FIREBASE CONFIGURATION ---
+            
+            firebase.initializeApp(firebaseConfig);
+            const db = firebase.database();
+
+            // DOM Elements
+            const appGrid = document.getElementById('app-grid');
+            const searchBar = document.getElementById('search-bar');
+            const gameModal = document.getElementById('game-modal');
+            const gameIframe = document.getElementById('game-iframe');
+            const modalCloseBtn = document.getElementById('modal-close-btn');
+            
+            let allItems = [];
+
+            db.ref('items').on('value', snapshot => {
+                allItems = [];
+                if(snapshot.exists()) {
+                    snapshot.forEach(childSnapshot => {
+                        allItems.push({ key: childSnapshot.key, ...childSnapshot.val() });
+                    });
+                }
+                allItems.sort((a, b) => b.createdAt - a.createdAt);
+                renderItems();
+            });
+
+            searchBar.addEventListener('input', renderItems);
+
+            function renderItems() {
+                const searchTerm = searchBar.value.toLowerCase();
+                const filteredItems = allItems.filter(item => {
+                    return item.title.toLowerCase().includes(searchTerm);
+                });
+
+                appGrid.innerHTML = '';
+                if (filteredItems.length === 0) {
+                    appGrid.innerHTML = `<p style="grid-column: 1 / -1; text-align: center;">No games match your criteria.</p>`;
+                    return;
+                }
+                
+                filteredItems.forEach(item => {
+                    const card = createGameCard(item);
+                    appGrid.appendChild(card);
+                });
+            }
+
+            function createGameCard(item) {
+                const card = document.createElement('div');
+                card.className = 'app-card';
+                
+                const avgRating = item.ratingCount > 0 ? (item.totalRating / item.ratingCount) : 0;
+                const hasRated = localStorage.getItem(`rated_${item.key}`);
+
+                let starsHTML = '';
+                for (let i = 1; i <= 5; i++) {
+                    starsHTML += `<span data-value="${i}" class="${i <= avgRating ? 'hovered' : ''}">${i <= avgRating ? '★' : '☆'}</span>`;
+                }
+
+                card.innerHTML = `
+                    <img src="${item.logoUrl}" alt="${item.title} Logo" class="app-card-logo" onerror="this.src='https://via.placeholder.com/100'">
+                    <h3 class="app-card-title">${item.title}</h3>
+                    <div class="rating-stars ${hasRated ? 'rated' : ''}" data-itemkey="${item.key}">
+                        ${starsHTML}
+                    </div>
+                    <button class="btn btn-outline play-btn">Play</button>
+                `;
+
+                // Play functionality
+                card.querySelector('.play-btn').addEventListener('click', () => {
+                    // *** নতুন এবং উন্নত সমাধান ***
+                    // আমরা পুরো গেমের কোডটিকে একটি wrapper div এর মধ্যে রাখছি।
+                    // এই wrapper div-টি স্ক্রল করার দায়িত্ব নেবে।
+                    const wrapperStart = `
+                        <style>
+                            html, body { margin: 0; padding: 0; }
+                            .iframe-scroll-wrapper {
+                                height: 100vh;
+                                overflow-y: auto;
+                                -webkit-overflow-scrolling: touch;
+                            }
+                        </style>
+                        <div class="iframe-scroll-wrapper">
+                    `;
+                    const wrapperEnd = '</div>';
+                    
+                    // এখানে আমরা wrapper এর শুরু, গেমের কোড, এবং wrapper এর শেষ একসাথে যোগ করছি।
+                    gameIframe.srcdoc = wrapperStart + item.htmlCode + wrapperEnd;
+                    gameModal.classList.add('visible');
+                });
+                
+                const stars = card.querySelectorAll('.rating-stars span');
+                if (!hasRated) {
+                    stars.forEach(star => {
+                        star.addEventListener('mouseover', () => {
+                            stars.forEach(s => s.classList.remove('hovered'));
+                            for (let i = 0; i < star.dataset.value; i++) {
+                                stars[i].classList.add('hovered');
+                            }
+                        });
+                        star.addEventListener('mouseout', () => {
+                             stars.forEach(s => s.classList.remove('hovered'));
+                        });
+                        star.addEventListener('click', () => {
+                            const newRating = parseInt(star.dataset.value);
+                            rateItem(item.key, newRating);
+                        });
+                    });
+                }
+
+                return card;
+            }
+
+            function rateItem(key, rating) {
+                 if (localStorage.getItem(`rated_${key}`)) {
+                    alert("You've already rated this item.");
+                    return;
+                }
+                const itemRef = db.ref(`items/${key}`);
+                itemRef.transaction(item => {
+                    if (item) {
+                        item.totalRating = (item.totalRating || 0) + rating;
+                        item.ratingCount = (item.ratingCount || 0) + 1;
+                    }
+                    return item;
+                }).then(() => {
+                     localStorage.setItem(`rated_${key}`, 'true');
+                     alert('Thanks for rating!');
+                });
+            }
+
+            modalCloseBtn.addEventListener('click', () => {
+                gameModal.classList.remove('visible');
+                gameIframe.srcdoc = '';
+            });
+        });
     </script>
-    <script type="text/javascript" src="//www.highperformanceformat.com/8f36f87f017498b17817aff785341b30/invoke.js"></script>
-  </div>
-
-  <script>
-    function appendValue(value) {
-      document.getElementById("display").value += value;
-    }
-
-    function clearDisplay() {
-      document.getElementById("display").value = '';
-    }
-
-    function calculate() {
-      try {
-        const result = eval(document.getElementById("display").value);
-        document.getElementById("display").value = result;
-      } catch {
-        document.getElementById("display").value = "Error";
-      }
-    }
-  </script>
 </body>
 </html>
